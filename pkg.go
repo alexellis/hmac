@@ -28,11 +28,17 @@ func Sign(message, key []byte) []byte {
 
 // Validate validate an encodedHash taken
 // from GitHub via X-Hub-Signature HTTP Header.
-// Note: if using another source, just add a 5 letter prefix such as "1234="
+// Note: if using another source, just add a 5 letter prefix such as "sha1="
 func Validate(bytesIn []byte, encodedHash string, secretKey string) error {
 	var validated error
 
 	if len(encodedHash) > 5 {
+
+		hashingMethod := encodedHash[:5]
+		if hashingMethod != "sha1=" {
+			return fmt.Errorf("unexpected hashing method: %s", hashingMethod)
+		}
+
 		messageMAC := encodedHash[5:] // first few chars are: sha1=
 		messageMACBuf, _ := hex.DecodeString(messageMAC)
 
