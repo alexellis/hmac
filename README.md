@@ -8,8 +8,14 @@ Validate HMAC in Golang.
 
 ## Who uses this project?
 
+A few of the notable dependents on this package, but there are many more:
+
 * [alexellis/derek](https://github.com/alexellis/derek/)
+* [openfaas/faas-cli](https://github.com/openfaas/faas-cli)
 * [openfaas/openfaas-cloud](https://github.com/openfaas/openfaas-cloud/)
+* [crossplane/tbs](https://github.com/crossplane/tbs)
+* [Qolzam/telar-cli](https://github.com/Qolzam/telar-cli)
+* [s8sg/faas-flow](https://github.com/s8sg/faas-flow)
 
 ## How it works:
 
