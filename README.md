@@ -2,9 +2,14 @@
 
 Validate HMAC in Golang.
 
-## Who uses it?
+## Who uses it HMAC?
 
 [GitHub](https://developer.github.com/webhooks/securing/), Patreon and some other parties will use HMAC signing with their outgoing webhooks so that you can verify the webhook is from the expected sender.
+
+## Who uses this project?
+
+* [alexellis/derek](https://github.com/alexellis/derek/)
+* [openfaas/openfaas-cloud](https://github.com/openfaas/openfaas-cloud/)
 
 ## How it works:
 
