@@ -3,13 +3,16 @@ package hmac
 import (
 	"crypto/hmac"
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"hash"
+	"strings"
 )
 
 // CheckMAC verifies hash checksum
-func CheckMAC(message, messageMAC, key []byte) bool {
-	mac := hmac.New(sha1.New, key)
+func CheckMAC(message, messageMAC, key []byte, sha func() hash.Hash) bool {
+	mac := hmac.New(sha, key)
 	mac.Write(message)
 	expectedMAC := mac.Sum(nil)
 
@@ -19,8 +22,8 @@ func CheckMAC(message, messageMAC, key []byte) bool {
 // Sign a message with the key and return bytes.
 // Note: for human readable output see encoding/hex and
 // encode string functions.
-func Sign(message, key []byte) []byte {
-	mac := hmac.New(sha1.New, key)
+func Sign(message, key []byte, sha func() hash.Hash) []byte {
+	mac := hmac.New(sha, key)
 	mac.Write(message)
 	signed := mac.Sum(nil)
 	return signed
@@ -32,22 +35,28 @@ func Sign(message, key []byte) []byte {
 func Validate(bytesIn []byte, encodedHash string, secretKey string) error {
 	var validated error
 
-	if len(encodedHash) > 5 {
+	var hashFn func() hash.Hash
+	var payload string
 
-		hashingMethod := encodedHash[:5]
-		if hashingMethod != "sha1=" {
-			return fmt.Errorf("unexpected hashing method: %s", hashingMethod)
-		}
+	if strings.HasPrefix(encodedHash, "sha1=") {
+		payload = strings.TrimPrefix(encodedHash, "sha1=")
 
-		messageMAC := encodedHash[5:] // first few chars are: sha1=
-		messageMACBuf, _ := hex.DecodeString(messageMAC)
+		hashFn = sha1.New
 
-		res := CheckMAC(bytesIn, []byte(messageMACBuf), []byte(secretKey))
-		if res == false {
-			validated = fmt.Errorf("invalid message digest or secret")
-		}
+	} else if strings.HasPrefix(encodedHash, "sha256=") {
+		payload = strings.TrimPrefix(encodedHash, "sha256=")
+
+		hashFn = sha256.New
 	} else {
-		return fmt.Errorf("invalid encodedHash, should have at least 5 characters")
+		return fmt.Errorf("valid hash prefixes: [sha1=, sha256=], got: %s", encodedHash)
+	}
+
+	messageMAC := payload
+	messageMACBuf, _ := hex.DecodeString(messageMAC)
+
+	res := CheckMAC(bytesIn, []byte(messageMACBuf), []byte(secretKey), hashFn)
+	if !res {
+		validated = fmt.Errorf("invalid message digest or secret")
 	}
 
 	return validated
